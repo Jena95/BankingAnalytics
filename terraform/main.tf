@@ -38,6 +38,40 @@ resource "google_pubsub_schema" "raw_data_schema" {
       {
         name = "table",
         type = "string"
+      },
+      {
+        name = "record",
+        type = {
+          type = "record",
+          name = "Record",
+          fields = [
+            { name = "customer_id", type = ["null", "long"] },
+            { name = "name", type = ["null", "string"] },
+            { name = "address", type = ["null", "string"] },
+            { name = "email", type = ["null", "string"] },
+            { name = "phone", type = ["null", "string"] },
+            { name = "date_joined", type = ["null", "string"] },
+            { name = "account_id", type = ["null", "long"] },
+            { name = "account_number", type = ["null", "string"] },
+            { name = "account_type", type = ["null", "string"] },
+            { name = "balance", type = ["null", "double"] },
+            { name = "open_date", type = ["null", "string"] },
+            { name = "status", type = ["null", "string"] },
+            { name = "transaction_id", type = ["null", "long"] },
+            { name = "transaction_date", type = ["null", "string"] },
+            { name = "transaction_type", type = ["null", "string"] },
+            { name = "amount", type = ["null", "double"] },
+            { name = "description", type = ["null", "string"] },
+            { name = "category","type": ["null", "string"] },
+            { name = "balance_after", type = ["null", "double"] },
+            { name = "loan_id", type = ["null", "long"] },
+            { name = "loan_type", type = ["null", "string"] },
+            { name = "principal", type = ["null", "double"] },
+            { name = "interest_rate", type = ["null", "double"] },
+            { name = "term_months", type = ["null", "long"] },
+            { name = "issue_date", type = ["null", "string"] }
+          ]
+        }
       }
     ]
   })
