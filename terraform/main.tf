@@ -50,7 +50,7 @@ resource "google_pubsub_subscription" "bq_subscription" {
   topic = google_pubsub_topic.banking_topic.id
 
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/${var.dataset_id}/tables/${var.table_id}"
+    table            = "${var.project_id}.${google_bigquery_dataset.banking_dataset.dataset_id}.${var.table_id}"
     use_topic_schema = false
     write_metadata   = false
 }
