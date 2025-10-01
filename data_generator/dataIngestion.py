@@ -24,11 +24,11 @@ def publish_to_pubsub(data, topic_path):
 
     for data_type, records in data.items():
         for record in records:
-            message_json = json.dumps({
-                "type": data_type,
-                "payload": record
-            })
-            message_bytes = message_json.encode("utf-8")
+            message_json = {
+                 "type": data_type
+            }
+            message_json.update(record)  # Flatten payload
+            message_bytes = json.dumps(message_json).encode("utf-8")
             try:
                 future = publisher.publish(topic_path, message_bytes)
                 future.result(timeout=10)

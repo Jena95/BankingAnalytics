@@ -21,12 +21,19 @@ resource "google_bigquery_table" "banking_table" {
   table_id   = var.table_id
 
   schema = jsonencode([
-    { name = "type", type = "STRING", mode = "REQUIRED" },
-    { name = "payload", type = "STRING", mode = "REQUIRED" }
+    { name = "type",           type = "STRING",  mode = "REQUIRED" },
+    { name = "account_id",     type = "INTEGER", mode = "NULLABLE" },
+    { name = "account_number", type = "STRING",  mode = "NULLABLE" },
+    { name = "account_type",   type = "STRING",  mode = "NULLABLE" },
+    { name = "balance",        type = "FLOAT",   mode = "NULLABLE" },
+    { name = "customer_id",    type = "INTEGER", mode = "NULLABLE" },
+    { name = "open_date",      type = "DATE",    mode = "NULLABLE" },
+    { name = "status",         type = "STRING",  mode = "NULLABLE" }
   ])
 
   deletion_protection = false
 }
+
 
 # -----------------------
 # Pub/Sub Topic (optional)
