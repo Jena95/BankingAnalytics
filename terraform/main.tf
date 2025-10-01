@@ -16,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "brave-reason-421203"  # Replace with your GCP project ID
+  default     = "brave-reason-421203"  # Your project ID from Cloud Shell
 }
 
 variable "region" {
@@ -48,7 +48,7 @@ resource "google_bigquery_dataset" "banking_raw" {
   delete_contents_on_destroy  = true  # For dev; set false in prod
 }
 
-# BigQuery Table with schema for raw JSON (table + record struct)
+# BigQuery Table with schema for raw JSON
 resource "google_bigquery_table" "raw_data" {
   dataset_id          = google_bigquery_dataset.banking_raw.dataset_id
   table_id            = "raw_data"
@@ -56,6 +56,12 @@ resource "google_bigquery_table" "raw_data" {
   deletion_protection = false  # For dev; set true in prod
 
   schema = jsonencode([
+    {
+      name        = "data"
+      type        = "STRING"
+      mode        = "REQUIRED"
+      description = "Raw JSON payload from Pub/Sub message"
+    },
     {
       name        = "table"
       type        = "STRING"
@@ -67,13 +73,31 @@ resource "google_bigquery_table" "raw_data" {
       type = "RECORD"
       mode = "REQUIRED"
       fields = [
-        { name = "id", type = "INTEGER", mode = "NULLABLE" },
-        { name = "name", type = "STRING", mode = "NULLABLE" },
-        { name = "address", type = "STRING", mode = "NULLABLE" },
-        { name = "balance", type = "FLOAT", mode = "NULLABLE" },
-        { name = "amount", type = "FLOAT", mode = "NULLABLE" },
-        { name = "principal", type = "FLOAT", mode = "NULLABLE" },
-        { name = "date", type = "TIMESTAMP", mode = "NULLABLE" }
+        { name = "customer_id", type = "INTEGER", mode = "NULLABLE", description = "Customer ID" },
+        { name = "name", type = "STRING", mode = "NULLABLE", description = "Customer name" },
+        { name = "address", type = "STRING", mode = "NULLABLE", description = "Customer address" },
+        { name = "email", type = "STRING", mode = "NULLABLE", description = "Customer email" },
+        { name = "phone", type = "STRING", mode = "NULLABLE", description = "Customer phone" },
+        { name = "date_joined", type = "DATE", mode = "NULLABLE", description = "Customer join date" },
+        { name = "account_id", type = "INTEGER", mode = "NULLABLE", description = "Account ID" },
+        { name = "account_number", type = "STRING", mode = "NULLABLE", description = "Account number" },
+        { name = "account_type", type = "STRING", mode = "NULLABLE", description = "Account type (Checking, Savings, Credit)" },
+        { name = "balance", type = "FLOAT", mode = "NULLABLE", description = "Account balance" },
+        { name = "open_date", type = "DATE", mode = "NULLABLE", description = "Account open date" },
+        { name = "status", type = "STRING", mode = "NULLABLE", description = "Account/loan status" },
+        { name = "transaction_id", type = "INTEGER", mode = "NULLABLE", description = "Transaction ID" },
+        { name = "transaction_date", type = "TIMESTAMP", mode = "NULLABLE", description = "Transaction date" },
+        { name = "transaction_type", type = "STRING", mode = "NULLABLE", description = "Transaction type (Deposit, Withdrawal, etc.)" },
+        { name = "amount", type = "FLOAT", mode = "NULLABLE", description = "Transaction amount" },
+        { name = "description", type = "STRING", mode = "NULLABLE", description = "Transaction description" },
+        { name = "category", type = "STRING", mode = "NULLABLE", description = "Transaction category" },
+        { name = "balance_after", type = "FLOAT", mode = "NULLABLE", description = "Balance after transaction" },
+        { name = "loan_id", type = "INTEGER", mode = "NULLABLE", description = "Loan ID" },
+        { name = "loan_type", type = "STRING", mode = "NULLABLE", description = "Loan type (Personal, Mortgage, Auto)" },
+        { name = "principal", type = "FLOAT", mode = "NULLABLE", description = "Loan principal" },
+        { name = "interest_rate", type = "FLOAT", mode = "NULLABLE", description = "Loan interest rate" },
+        { name = "term_months", type = "INTEGER", mode = "NULLABLE", description = "Loan term in months" },
+        { name = "issue_date", type = "DATE", mode = "NULLABLE", description = "Loan issue date" }
       ]
     }
   ])
@@ -93,7 +117,7 @@ resource "google_pubsub_subscription" "raw_data_sub" {
 
   bigquery_config {
     table = "${var.project_id}.${google_bigquery_dataset.banking_raw.dataset_id}.${google_bigquery_table.raw_data.table_id}"
-    # write_metadata = true  # Optional: Include Pub/Sub metadata (e.g., message_id, publish_time)
+    write_metadata = true  # Include Pub/Sub metadata (e.g., message_id, publish_time)
   }
 
   message_retention_duration = "604800s"  # 7 days in seconds
