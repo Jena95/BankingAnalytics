@@ -34,7 +34,9 @@ def publish_to_pubsub(data: Dict[str, Any]):
             records.append({
                 "data": json.dumps(record),
                 "table": table_name,
-                "record": record
+                "record": {
+                        "Record": record  # <--- this is required by AVRO union rules
+                }
             })
     
     # Publish messages in batches
