@@ -28,7 +28,7 @@ variable "region" {
 variable "project_number" {
   description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
   type        = string
-  default     = ""  # Replace with your project number
+  default     = "185017523924"  # Replace with your project number
 }
 
 # Pub/Sub Topic
