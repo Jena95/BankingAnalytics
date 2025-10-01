@@ -16,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "brave-reason-421203"  # Your project ID from Cloud Shell
+  default     = "brave-reason-421203"  # Your project ID
 }
 
 variable "region" {
@@ -28,7 +28,7 @@ variable "region" {
 variable "project_number" {
   description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
   type        = string
-  default     = "185017523924"  # Replace with your project number
+  default     = ""  # Replace with your project number
 }
 
 # Pub/Sub Topic
@@ -117,7 +117,7 @@ resource "google_pubsub_subscription" "raw_data_sub" {
 
   bigquery_config {
     table = "${var.project_id}.${google_bigquery_dataset.banking_raw.dataset_id}.${google_bigquery_table.raw_data.table_id}"
-    write_metadata = true  # Include Pub/Sub metadata (e.g., message_id, publish_time)
+    # write_metadata removed to avoid requiring metadata columns
   }
 
   message_retention_duration = "604800s"  # 7 days in seconds
