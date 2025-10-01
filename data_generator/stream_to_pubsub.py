@@ -32,6 +32,7 @@ def publish_to_pubsub(data: Dict[str, Any]):
     for table_name, table_data in data.items():
         for record in table_data:
             records.append({
+                "data": json.dumps(record),
                 "table": table_name,
                 "record": record
             })
