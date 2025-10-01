@@ -1,9 +1,0 @@
-[
-  { "name": "account_id", "type": "INTEGER", "mode": "REQUIRED" },
-  { "name": "customer_id", "type": "INTEGER", "mode": "REQUIRED" },
-  { "name": "account_number", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "account_type", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "balance", "type": "FLOAT", "mode": "NULLABLE" },
-  { "name": "open_date", "type": "DATE", "mode": "NULLABLE" },
-  { "name": "status", "type": "STRING", "mode": "NULLABLE" }
-]

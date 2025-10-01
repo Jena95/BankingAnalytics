@@ -1,8 +1,0 @@
-[
-  { "name": "customer_id", "type": "INTEGER", "mode": "REQUIRED" },
-  { "name": "name", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "address", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "email", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "phone", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "date_joined", "type": "DATE", "mode": "NULLABLE" }
-]
