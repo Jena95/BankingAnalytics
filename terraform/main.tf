@@ -41,7 +41,7 @@ resource "google_pubsub_schema" "raw_data_schema" {
       },
       {
         name = "record",
-        type = {
+        type = ["null", {
           type = "record",
           name = "Record",
           fields = [
@@ -62,7 +62,7 @@ resource "google_pubsub_schema" "raw_data_schema" {
             { name = "transaction_type", type = ["null", "string"] },
             { name = "amount", type = ["null", "double"] },
             { name = "description", type = ["null", "string"] },
-            { name = "category","type": ["null", "string"] },
+            { name = "category", type = ["null", "string"] },
             { name = "balance_after", type = ["null", "double"] },
             { name = "loan_id", type = ["null", "long"] },
             { name = "loan_type", type = ["null", "string"] },
@@ -71,7 +71,7 @@ resource "google_pubsub_schema" "raw_data_schema" {
             { name = "term_months", type = ["null", "long"] },
             { name = "issue_date", type = ["null", "string"] }
           ]
-        }
+        }]
       }
     ]
   })

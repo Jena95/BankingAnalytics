@@ -14,7 +14,7 @@
   {
     "name": "record",
     "type": "RECORD",
-    "mode": "REQUIRED",
+    "mode": "NULLABLE",
     "fields": [
       { "name": "customer_id", "type": "INTEGER", "mode": "NULLABLE", "description": "Customer ID" },
       { "name": "name", "type": "STRING", "mode": "NULLABLE", "description": "Customer name" },
