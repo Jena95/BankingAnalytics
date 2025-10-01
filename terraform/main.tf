@@ -16,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "brave-reason-421203"  # Replace with your GCP project ID
+  default     = "your-project-id"  # Replace with your GCP project ID
 }
 
 variable "region" {
@@ -28,7 +28,7 @@ variable "region" {
 variable "project_number" {
   description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
   type        = string
-  default     = "185017523924"  # Replace with your project number
+  default     = ""  # Replace with your project number
 }
 
 # Pub/Sub Topic
@@ -67,7 +67,7 @@ resource "google_bigquery_table" "raw_data" {
       type = "RECORD"
       mode = "REQUIRED"
       fields = [
-        { name = "id", type = "INTEGER", mode = "NULLABLE" },  # Adjusted to NULLABLE for flexibility
+        { name = "id", type = "INTEGER", mode = "NULLABLE" },
         { name = "name", type = "STRING", mode = "NULLABLE" },
         { name = "address", type = "STRING", mode = "NULLABLE" },
         { name = "balance", type = "FLOAT", mode = "NULLABLE" },
@@ -96,7 +96,7 @@ resource "google_pubsub_subscription" "raw_data_sub" {
     # write_metadata = true  # Optional: Include Pub/Sub metadata (e.g., message_id, publish_time)
   }
 
-  message_retention_duration = "7d"  # Retain unacknowledged messages for 7 days
+  message_retention_duration = "604800s"  # 7 days in seconds
 
   depends_on = [google_bigquery_table.raw_data]
 }
