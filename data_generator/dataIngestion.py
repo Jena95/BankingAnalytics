@@ -1,20 +1,16 @@
+import argparse
 import requests
 import json
+import os
 from google.cloud import pubsub_v1
 
-FLASK_API_URL = "http://localhost:5000/generate_data"
-PUBSUB_TOPIC = "projects/YOUR_PROJECT_ID/topics/banking-raw-data"
-
-NUM_CUSTOMERS = 100
-TRANSACTIONS_PER_ACCOUNT = 10
-
-def fetch_data():
+def fetch_data(api_url, num_customers, transactions_per_account):
     try:
         response = requests.post(
-            FLASK_API_URL,
+            api_url,
             json={
-                "num_customers": NUM_CUSTOMERS,
-                "transactions_per_account": TRANSACTIONS_PER_ACCOUNT
+                "num_customers": num_customers,
+                "transactions_per_account": transactions_per_account
             }
         )
         response.raise_for_status()
@@ -23,7 +19,7 @@ def fetch_data():
         print(f"Error fetching data: {e}")
         return None
 
-def publish_to_pubsub(data):
+def publish_to_pubsub(data, topic_path):
     publisher = pubsub_v1.PublisherClient()
 
     for data_type, records in data.items():
@@ -33,15 +29,43 @@ def publish_to_pubsub(data):
                 "payload": record
             })
             message_bytes = message_json.encode("utf-8")
-            future = publisher.publish(PUBSUB_TOPIC, message_bytes)
-            future.result()
-
+            try:
+                future = publisher.publish(topic_path, message_bytes)
+                future.result(timeout=10)
+            except Exception as e:
+                print(f"Failed to publish message of type {data_type}: {e}")
+    
     print("Data published to Pub/Sub successfully.")
 
-if __name__ == "__main__":
-    api_response = fetch_data()
+def main():
+    parser = argparse.ArgumentParser(description="Fetch synthetic banking data and publish to Google Pub/Sub.")
+    
+    parser.add_argument('--num_customers', type=int, default=100,
+                        help='Number of customers to generate (default: 100)')
+    
+    parser.add_argument('--transactions_per_account', type=int, default=10,
+                        help='Number of transactions per account (default: 10)')
+    
+    parser.add_argument('--api_url', type=str, default='http://localhost:5000/generate_data',
+                        help='URL of the Flask API endpoint (default: http://localhost:5000/generate_data)')
+    
+    parser.add_argument('--project_id', type=str, required=True,
+                        help='Google Cloud project ID')
+    
+    parser.add_argument('--topic_id', type=str, default='banking-raw-data',
+                        help='Pub/Sub topic ID (default: banking-raw-data)')
+
+    args = parser.parse_args()
+
+    topic_path = f"projects/{args.project_id}/topics/{args.topic_id}"
+
+    api_response = fetch_data(args.api_url, args.num_customers, args.transactions_per_account)
+    
     if api_response and api_response.get("success"):
         data = api_response["data"]
-        publish_to_pubsub(data)
+        publish_to_pubsub(data, topic_path)
     else:
         print("Failed to retrieve or publish data.")
+
+if __name__ == "__main__":
+    main()
