@@ -55,29 +55,24 @@ resource "google_bigquery_table" "raw_data" {
   project             = var.project_id
   deletion_protection = false  # For dev; set true in prod
 
-  # Pub/Sub Schema
-resource "google_pubsub_schema" "raw_data_schema" {
-  name = "raw-data-schema"
-  project = var.project_id
-  type = "AVRO"
-  definition = jsonencode({
-    type = "record",
-    name = "RawData",
-    fields = [
-      {
-        name = "data",
-        type = "string"
-      },
-      {
-        name = "table",
-        type = "string"
-      },
-      {
-        name = "record",
-        type = {
-          type = "record",
-          name = "Record",
-          fields = [
+  schema = jsonencode([
+    {
+      name        = "data"
+      type        = "STRING"
+      mode        = "REQUIRED"
+      description = "Raw JSON payload from Pub/Sub message"
+    },
+    {
+      name        = "table"
+      type        = "STRING"
+      mode        = "REQUIRED"
+      description = "Source table (customers, accounts, transactions, loans)"
+    },
+    {
+      name = "record"
+      type = "RECORD"
+      mode = "REQUIRED"
+      fields = [
             { name = "customer_id", type = ["null", "long"] },
             { name = "name", type = ["null", "string"] },
             { name = "address", type = ["null", "string"] },
@@ -104,11 +99,8 @@ resource "google_pubsub_schema" "raw_data_schema" {
             { name = "term_months", type = ["null", "long"] },
             { name = "issue_date", type = ["null", "string"] }
           ]
-        }
-      }
-    ]
-  })
-}
+    }
+  ])
 
   time_partitioning {
     type = "DAY"  # Partition by ingestion date
