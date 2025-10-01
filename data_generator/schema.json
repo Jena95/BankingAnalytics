@@ -1,0 +1,46 @@
+[
+  {
+    "name": "data",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Raw JSON payload from Pub/Sub message"
+  },
+  {
+    "name": "table",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Source table (customers, accounts, transactions, loans)"
+  },
+  {
+    "name": "record",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "fields": [
+      { "name": "customer_id", "type": "INTEGER", "mode": "NULLABLE", "description": "Customer ID" },
+      { "name": "name", "type": "STRING", "mode": "NULLABLE", "description": "Customer name" },
+      { "name": "address", "type": "STRING", "mode": "NULLABLE", "description": "Customer address" },
+      { "name": "email", "type": "STRING", "mode": "NULLABLE", "description": "Customer email" },
+      { "name": "phone", "type": "STRING", "mode": "NULLABLE", "description": "Customer phone" },
+      { "name": "date_joined", "type": "DATE", "mode": "NULLABLE", "description": "Customer join date" },
+      { "name": "account_id", "type": "INTEGER", "mode": "NULLABLE", "description": "Account ID" },
+      { "name": "account_number", "type": "STRING", "mode": "NULLABLE", "description": "Account number" },
+      { "name": "account_type", "type": "STRING", "mode": "NULLABLE", "description": "Account type (Checking, Savings, Credit)" },
+      { "name": "balance", "type": "FLOAT", "mode": "NULLABLE", "description": "Account balance" },
+      { "name": "open_date", "type": "DATE", "mode": "NULLABLE", "description": "Account open date" },
+      { "name": "status", "type": "STRING", "mode": "NULLABLE", "description": "Account/loan status" },
+      { "name": "transaction_id", "type": "INTEGER", "mode": "NULLABLE", "description": "Transaction ID" },
+      { "name": "transaction_date", "type": "TIMESTAMP", "mode": "NULLABLE", "description": "Transaction date" },
+      { "name": "transaction_type", "type": "STRING", "mode": "NULLABLE", "description": "Transaction type (Deposit, Withdrawal, etc.)" },
+      { "name": "amount", "type": "FLOAT", "mode": "NULLABLE", "description": "Transaction amount" },
+      { "name": "description", "type": "STRING", "mode": "NULLABLE", "description": "Transaction description" },
+      { "name": "category", "type": "STRING", "mode": "NULLABLE", "description": "Transaction category" },
+      { "name": "balance_after", "type": "FLOAT", "mode": "NULLABLE", "description": "Balance after transaction" },
+      { "name": "loan_id", "type": "INTEGER", "mode": "NULLABLE", "description": "Loan ID" },
+      { "name": "loan_type", "type": "STRING", "mode": "NULLABLE", "description": "Loan type (Personal, Mortgage, Auto)" },
+      { "name": "principal", "type": "FLOAT", "mode": "NULLABLE", "description": "Loan principal" },
+      { "name": "interest_rate", "type": "FLOAT", "mode": "NULLABLE", "description": "Loan interest rate" },
+      { "name": "term_months", "type": "INTEGER", "mode": "NULLABLE", "description": "Loan term in months" },
+      { "name": "issue_date", "type": "DATE", "mode": "NULLABLE", "description": "Loan issue date" }
+    ]
+  }
+]
