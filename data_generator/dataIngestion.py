@@ -28,7 +28,7 @@ def publish_to_pubsub(data, topic_path, data_type_filter=None):
 
         for record in records:
             try:
-                message_bytes = json.dumps({"data": record}).encode("utf-8")
+                message_bytes = json.dumps(record).encode("utf-8")
                 future = publisher.publish(topic_path, message_bytes)
                 future.result(timeout=10)
                 count += 1
