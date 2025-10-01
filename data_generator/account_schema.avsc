@@ -1,14 +1,12 @@
 {
-  "type": "record",
-  "name": "AccountRecord",
-  "fields": [
-    { "name": "type", "type": "string" },
-    { "name": "account_id", "type": "int" },
-    { "name": "account_number", "type": "string" },
-    { "name": "account_type", "type": "string" },
-    { "name": "balance", "type": "float" },
-    { "name": "customer_id", "type": "int" },
-    { "name": "open_date", "type": "string" },
-    { "name": "status", "type": "string" }
-  ]
+  "data": {
+    "type": "AccountRecord",
+    "account_id": 123,
+    "account_number": "ACC123",
+    "account_type": "savings",
+    "balance": 1000.0,
+    "customer_id": 456,
+    "open_date": "2023-01-01",
+    "status": "active"
+  }
 }
