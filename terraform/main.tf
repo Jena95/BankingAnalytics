@@ -55,12 +55,10 @@ resource "google_pubsub_subscription" "customers_subscription" {
   name  = "customers-subscription"
   topic = google_pubsub_topic.banking_raw_data.name
 
-  filter = "attributes.data_type = \"customers\""
-
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/${google_bigquery_dataset.raw_data.dataset_id}/tables/customers"
-    use_topic_schema = false
-    write_metadata   = true
+    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.customers"
+    use_topic_schema   = false
+    write_metadata     = true
   }
 
   ack_deadline_seconds = 60
@@ -70,12 +68,10 @@ resource "google_pubsub_subscription" "accounts_subscription" {
   name  = "accounts-subscription"
   topic = google_pubsub_topic.banking_raw_data.name
 
-  filter = "attributes.data_type = \"accounts\""
-
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/${google_bigquery_dataset.raw_data.dataset_id}/tables/accounts"
-    use_topic_schema = false
-    write_metadata   = true
+    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.accounts"
+    use_topic_schema   = false
+    write_metadata     = true
   }
 
   ack_deadline_seconds = 60
@@ -85,12 +81,10 @@ resource "google_pubsub_subscription" "transactions_subscription" {
   name  = "transactions-subscription"
   topic = google_pubsub_topic.banking_raw_data.name
 
-  filter = "attributes.data_type = \"transactions\""
-
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/${google_bigquery_dataset.raw_data.dataset_id}/tables/transactions"
-    use_topic_schema = false
-    write_metadata   = true
+    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.transactions"
+    use_topic_schema   = false
+    write_metadata     = true
   }
 
   ack_deadline_seconds = 60
@@ -100,14 +94,11 @@ resource "google_pubsub_subscription" "loans_subscription" {
   name  = "loans-subscription"
   topic = google_pubsub_topic.banking_raw_data.name
 
-  filter = "attributes.data_type = \"loans\""
-
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/${google_bigquery_dataset.raw_data.dataset_id}/tables/loans"
-    use_topic_schema = false
-    write_metadata   = true
+    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.loans"
+    use_topic_schema   = false
+    write_metadata     = true
   }
 
   ack_deadline_seconds = 60
 }
-
