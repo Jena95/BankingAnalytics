@@ -55,5 +55,6 @@ resource "google_pubsub_subscription" "bq_subscription" {
     write_metadata      = false
   }
 
-  ack_deadline_seconds = 20
+  ack_deadline_seconds        = 20
+  message_retention_duration  = "604800s" # 7 days
 }
