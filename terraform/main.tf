@@ -55,52 +55,60 @@ resource "google_bigquery_table" "raw_data" {
   project             = var.project_id
   deletion_protection = false  # For dev; set true in prod
 
-  schema = jsonencode([
-    {
-      name        = "data"
-      type        = "STRING"
-      mode        = "REQUIRED"
-      description = "Raw JSON payload from Pub/Sub message"
-    },
-    {
-      name        = "table"
-      type        = "STRING"
-      mode        = "REQUIRED"
-      description = "Source table (customers, accounts, transactions, loans)"
-    },
-    {
-      name = "record"
-      type = "RECORD"
-      mode = "REQUIRED"
-      fields = [
-        { name = "customer_id", type = "INTEGER", mode = "NULLABLE", description = "Customer ID" },
-        { name = "name", type = "STRING", mode = "NULLABLE", description = "Customer name" },
-        { name = "address", type = "STRING", mode = "NULLABLE", description = "Customer address" },
-        { name = "email", type = "STRING", mode = "NULLABLE", description = "Customer email" },
-        { name = "phone", type = "STRING", mode = "NULLABLE", description = "Customer phone" },
-        { name = "date_joined", type = "DATE", mode = "NULLABLE", description = "Customer join date" },
-        { name = "account_id", type = "INTEGER", mode = "NULLABLE", description = "Account ID" },
-        { name = "account_number", type = "STRING", mode = "NULLABLE", description = "Account number" },
-        { name = "account_type", type = "STRING", mode = "NULLABLE", description = "Account type (Checking, Savings, Credit)" },
-        { name = "balance", type = "FLOAT", mode = "NULLABLE", description = "Account balance" },
-        { name = "open_date", type = "DATE", mode = "NULLABLE", description = "Account open date" },
-        { name = "status", type = "STRING", mode = "NULLABLE", description = "Account/loan status" },
-        { name = "transaction_id", type = "INTEGER", mode = "NULLABLE", description = "Transaction ID" },
-        { name = "transaction_date", type = "TIMESTAMP", mode = "NULLABLE", description = "Transaction date" },
-        { name = "transaction_type", type = "STRING", mode = "NULLABLE", description = "Transaction type (Deposit, Withdrawal, etc.)" },
-        { name = "amount", type = "FLOAT", mode = "NULLABLE", description = "Transaction amount" },
-        { name = "description", type = "STRING", mode = "NULLABLE", description = "Transaction description" },
-        { name = "category", type = "STRING", mode = "NULLABLE", description = "Transaction category" },
-        { name = "balance_after", type = "FLOAT", mode = "NULLABLE", description = "Balance after transaction" },
-        { name = "loan_id", type = "INTEGER", mode = "NULLABLE", description = "Loan ID" },
-        { name = "loan_type", type = "STRING", mode = "NULLABLE", description = "Loan type (Personal, Mortgage, Auto)" },
-        { name = "principal", type = "FLOAT", mode = "NULLABLE", description = "Loan principal" },
-        { name = "interest_rate", type = "FLOAT", mode = "NULLABLE", description = "Loan interest rate" },
-        { name = "term_months", type = "INTEGER", mode = "NULLABLE", description = "Loan term in months" },
-        { name = "issue_date", type = "DATE", mode = "NULLABLE", description = "Loan issue date" }
-      ]
-    }
-  ])
+  # Pub/Sub Schema
+resource "google_pubsub_schema" "raw_data_schema" {
+  name = "raw-data-schema"
+  project = var.project_id
+  type = "AVRO"
+  definition = jsonencode({
+    type = "record",
+    name = "RawData",
+    fields = [
+      {
+        name = "data",
+        type = "string"
+      },
+      {
+        name = "table",
+        type = "string"
+      },
+      {
+        name = "record",
+        type = {
+          type = "record",
+          name = "Record",
+          fields = [
+            { name = "customer_id", type = ["null", "long"] },
+            { name = "name", type = ["null", "string"] },
+            { name = "address", type = ["null", "string"] },
+            { name = "email", type = ["null", "string"] },
+            { name = "phone", type = ["null", "string"] },
+            { name = "date_joined", type = ["null", "string"] },
+            { name = "account_id", type = ["null", "long"] },
+            { name = "account_number", type = ["null", "string"] },
+            { name = "account_type", type = ["null", "string"] },
+            { name = "balance", type = ["null", "double"] },
+            { name = "open_date", type = ["null", "string"] },
+            { name = "status", type = ["null", "string"] },
+            { name = "transaction_id", type = ["null", "long"] },
+            { name = "transaction_date", type = ["null", "string"] },
+            { name = "transaction_type", type = ["null", "string"] },
+            { name = "amount", type = ["null", "double"] },
+            { name = "description", type = ["null", "string"] },
+            { name = "category", type = ["null", "string"] },
+            { name = "balance_after", type = ["null", "double"] },
+            { name = "loan_id", type = ["null", "long"] },
+            { name = "loan_type", type = ["null", "string"] },
+            { name = "principal", type = ["null", "double"] },
+            { name = "interest_rate", type = ["null", "double"] },
+            { name = "term_months", type = ["null", "long"] },
+            { name = "issue_date", type = ["null", "string"] }
+          ]
+        }
+      }
+    ]
+  })
+}
 
   time_partitioning {
     type = "DAY"  # Partition by ingestion date
