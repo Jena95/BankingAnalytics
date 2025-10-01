@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "Loan",
+  "fields": [
+    {"name": "loan_id", "type": "long"},
+    {"name": "customer_id", "type": "long"},
+    {"name": "loan_type", "type": "string"},
+    {"name": "principal", "type": "double"},
+    {"name": "interest_rate", "type": "double"},
+    {"name": "term_months", "type": "int"},
+    {"name": "issue_date", "type": "string"},
+    {"name": "status", "type": "string"}
+  ]
+}

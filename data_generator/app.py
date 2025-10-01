@@ -23,7 +23,7 @@ def generate_random_name():
 def generate_random_address():
     streets = ['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Maple Dr', 'Cedar Ln', 'Birch Blvd', 'Willow Way']
     cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego']
-    states = ['NY', 'CA', 'IL', 'TX', 'AZ', 'PA', 'TX', 'CA']
+    states = ['NY', 'CA', 'IL','TX', 'AZ', 'PA', 'TX', 'CA']
     zip_codes = [random.randint(10000, 99999) for _ in range(8)]
     street_num = random.randint(100, 9999)
     city_idx = random.randint(0, 7)
@@ -170,7 +170,7 @@ def api_generate_data():
         return jsonify(response)
 
     except Exception as e:
-        return jsonify({
+        return jsonify({ 
             'success': False,
             'message': str(e)
         }), 500
