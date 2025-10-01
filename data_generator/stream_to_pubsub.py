@@ -5,7 +5,7 @@ from typing import Dict, Any
 
 # Configuration
 API_URL = "http://localhost:5000/generate_data"  # Update to your Flask API URL
-PROJECT_ID = "your-project-id"  # Replace with your GCP project ID
+PROJECT_ID = "brave-reason-421203"  # Replace with your GCP project ID
 TOPIC_ID = "banking-raw-data-topic"  # Matches Terraform below
 BATCH_SIZE = 100  # Number of messages to process before waiting for completion
 
