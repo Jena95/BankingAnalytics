@@ -3,102 +3,50 @@ provider "google" {
   region  = var.region
 }
 
-resource "google_pubsub_topic" "banking_raw_data" {
-  name = "banking-raw-data"
+# -----------------------
+# BigQuery Dataset
+# -----------------------
+resource "google_bigquery_dataset" "banking_dataset" {
+  dataset_id                  = var.dataset_id
+  friendly_name               = "Banking Dataset"
+  location                    = var.region
+  delete_contents_on_destroy = true
 }
 
-resource "google_bigquery_dataset" "raw_data" {
-  dataset_id  = "raw_banking_data"
-  location    = var.region
-  description = "Dataset to store raw banking data ingested from Pub/Sub"
+# -----------------------
+# BigQuery Table
+# -----------------------
+resource "google_bigquery_table" "banking_table" {
+  dataset_id = google_bigquery_dataset.banking_dataset.dataset_id
+  table_id   = var.table_id
+
+  schema = jsonencode([
+    { name = "type", type = "STRING", mode = "REQUIRED" },
+    { name = "payload", type = "STRING", mode = "REQUIRED" }
+  ])
+
+  deletion_protection = false
 }
 
-resource "google_bigquery_table" "customers" {
-  dataset_id = google_bigquery_dataset.raw_data.dataset_id
-  table_id   = "customers"
-  schema     = file("schemas/customers.json")
-  time_partitioning {
-    type = "DAY"
-  }
+# -----------------------
+# Pub/Sub Topic (optional)
+# -----------------------
+resource "google_pubsub_topic" "banking_topic" {
+  name = var.pubsub_topic_name
 }
 
-resource "google_bigquery_table" "accounts" {
-  dataset_id = google_bigquery_dataset.raw_data.dataset_id
-  table_id   = "accounts"
-  schema     = file("schemas/accounts.json")
-  time_partitioning {
-    type = "DAY"
-  }
-}
-
-resource "google_bigquery_table" "transactions" {
-  dataset_id = google_bigquery_dataset.raw_data.dataset_id
-  table_id   = "transactions"
-  schema     = file("schemas/transactions.json")
-  time_partitioning {
-    type = "DAY"
-  }
-}
-
-resource "google_bigquery_table" "loans" {
-  dataset_id = google_bigquery_dataset.raw_data.dataset_id
-  table_id   = "loans"
-  schema     = file("schemas/loans.json")
-  time_partitioning {
-    type = "DAY"
-  }
-}
-
-# Pub/Sub subscriptions with BigQuery as sink
-
-resource "google_pubsub_subscription" "customers_subscription" {
-  name  = "customers-subscription"
-  topic = google_pubsub_topic.banking_raw_data.name
+# -----------------------
+# Pub/Sub → BigQuery Subscription
+# -----------------------
+resource "google_pubsub_subscription" "bq_subscription" {
+  name  = var.subscription_name
+  topic = google_pubsub_topic.banking_topic.id
 
   bigquery_config {
-    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.customers"
-    use_topic_schema   = false
-    write_metadata     = true
+    table               = google_bigquery_table.banking_table.id
+    use_topic_schema    = false
+    write_metadata      = false
   }
 
-  ack_deadline_seconds = 60
-}
-
-resource "google_pubsub_subscription" "accounts_subscription" {
-  name  = "accounts-subscription"
-  topic = google_pubsub_topic.banking_raw_data.name
-
-  bigquery_config {
-    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.accounts"
-    use_topic_schema   = false
-    write_metadata     = true
-  }
-
-  ack_deadline_seconds = 60
-}
-
-resource "google_pubsub_subscription" "transactions_subscription" {
-  name  = "transactions-subscription"
-  topic = google_pubsub_topic.banking_raw_data.name
-
-  bigquery_config {
-    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.transactions"
-    use_topic_schema   = false
-    write_metadata     = true
-  }
-
-  ack_deadline_seconds = 60
-}
-
-resource "google_pubsub_subscription" "loans_subscription" {
-  name  = "loans-subscription"
-  topic = google_pubsub_topic.banking_raw_data.name
-
-  bigquery_config {
-    table              = "${var.project_id}.${google_bigquery_dataset.raw_data.dataset_id}.loans"
-    use_topic_schema   = false
-    write_metadata     = true
-  }
-
-  ack_deadline_seconds = 60
+  ack_deadline_seconds = 20
 }
