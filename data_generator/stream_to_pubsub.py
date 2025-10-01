@@ -3,8 +3,8 @@ from typing import Dict, Any
 from google.cloud import pubsub_v1
 
 # Config - update your project and topic
-PROJECT_ID = "your-gcp-project-id"
-TOPIC_ID = "your-pubsub-topic"
+PROJECT_ID = "brave-reason-421203"
+TOPIC_ID = "banking-raw-data-topic"
 BATCH_SIZE = 10
 
 # Load your BQ schema from schema.json
