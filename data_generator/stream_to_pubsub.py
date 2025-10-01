@@ -5,9 +5,9 @@ from typing import Dict, Any
 
 # Configuration
 API_URL = "http://localhost:5000/generate_data"  # Update to your Flask API URL
-PROJECT_ID = "brave-reason-421203"  # Replace with your GCP project ID
+PROJECT_ID = "your-project-id"  # Replace with your GCP project ID
 TOPIC_ID = "banking-raw-data-topic"  # Matches Terraform below
-BATCH_SIZE = 100  # Pub/Sub batch size for efficiency
+BATCH_SIZE = 100  # Number of messages to process before waiting for completion
 
 def call_api_generate_data(num_customers: int = 1000, transactions_per_account: int = 50) -> Dict[str, Any]:
     """Call the Flask API to generate banking data."""
@@ -36,26 +36,40 @@ def publish_to_pubsub(data: Dict[str, Any]):
                 "record": record
             })
     
-    # Publish in batches
-    batch_messages = []
+    # Publish messages in batches
+    futures = []
     for i, record in enumerate(records):
-        message_data = json.dumps(record).encode("utf-8")
-        batch_messages.append(
-            pubsub_v1.types.PubsubMessage(data=message_data)
-        )
-        
-        if len(batch_messages) == BATCH_SIZE or i == len(records) - 1:
-            try:
-                future = publisher.publish(topic_path, batch_messages)
-                print(f"Published batch of {len(batch_messages)} messages. Message ID: {future.result()}")
-            except Exception as e:
-                print(f"Error publishing batch: {e}")
-            batch_messages = []  # Reset batch
+        message_data = json.dumps(record).encode("utf-8")  # Convert to bytestring
+        try:
+            future = publisher.publish(topic_path, data=message_data)
+            futures.append(future)
+            if len(futures) >= BATCH_SIZE or i == len(records) - 1:
+                # Wait for all futures in the current batch to complete
+                for f in futures:
+                    try:
+                        message_id = f.result()  # Block until published
+                        print(f"Published message ID: {message_id}")
+                    except Exception as e:
+                        print(f"Error publishing message: {e}")
+                futures = []  # Reset for next batch
+        except Exception as e:
+            print(f"Error preparing message {i + 1}: {e}")
     
-    publisher.close()
+    # Ensure all remaining futures are resolved
+    for f in futures:
+        try:
+            message_id = f.result()
+            print(f"Published message ID: {message_id}")
+        except Exception as e:
+            print(f"Error publishing message: {e}")
+
+    print(f"Published {len(records)} messages to {topic_path}")
 
 if __name__ == "__main__":
     # Generate and stream data
-    generated_data = call_api_generate_data(num_customers=1000, transactions_per_account=50)
-    publish_to_pubsub(generated_data)
-    print("Data streaming to Pub/Sub complete.")
+    try:
+        generated_data = call_api_generate_data(num_customers=1000, transactions_per_account=50)
+        publish_to_pubsub(generated_data)
+        print("Data streaming to Pub/Sub complete.")
+    except Exception as e:
+        print(f"Error in streaming process: {e}")
