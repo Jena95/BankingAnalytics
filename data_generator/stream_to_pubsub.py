@@ -21,12 +21,7 @@ BQ_TO_AVRO_TYPE = {
 }
 
 def wrap_union_fields(record: dict) -> dict:
-    """
-    Wrap fields to match AVRO union type format required by Pub/Sub schema validation.
-    Fields that are None remain None, others wrapped as { avro_type: value }
-    """
     wrapped = {}
-    # Get the 'record' fields definition from the schema
     record_fields = next(field for field in BQ_SCHEMA if field["name"] == "record")["fields"]
 
     for field_def in record_fields:
@@ -37,12 +32,14 @@ def wrap_union_fields(record: dict) -> dict:
         value = record.get(field_name)
 
         if value is None:
-            wrapped[field_name] = None
+            wrapped[field_name] = None  # null is allowed
         else:
-            # Wrap value as required for AVRO union
+            # Wrap the field as a single key dict only with the Avro type key
+            # IMPORTANT: Do NOT include multiple keys in this dict
             wrapped[field_name] = {avro_type: value}
 
     return wrapped
+
 
 def publish_to_pubsub(data: Dict[str, Any]):
     """
