@@ -22,6 +22,7 @@ BQ_TO_AVRO_TYPE = {
 
 def wrap_union_fields(record: dict) -> dict:
     wrapped = {}
+    # Assuming BQ_SCHEMA is your schema definition list
     record_fields = next(field for field in BQ_SCHEMA if field["name"] == "record")["fields"]
 
     for field_def in record_fields:
@@ -32,13 +33,13 @@ def wrap_union_fields(record: dict) -> dict:
         value = record.get(field_name)
 
         if value is None:
-            wrapped[field_name] = None  # null is allowed
+            wrapped[field_name] = None
         else:
-            # Wrap the field as a single key dict only with the Avro type key
-            # IMPORTANT: Do NOT include multiple keys in this dict
+            # Wrap only once with the correct Avro type key
             wrapped[field_name] = {avro_type: value}
 
     return wrapped
+
 
 
 def publish_to_pubsub(data: Dict[str, Any]):
