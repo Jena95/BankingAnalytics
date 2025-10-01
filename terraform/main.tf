@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.42.0"
+    }
+  }
+}
+
 provider "google" {
   project = var.project_id
   region  = var.region
@@ -7,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "brave-reason-421203"  # Your project ID
+  default     = "brave-reason-421203"
 }
 
 variable "region" {
@@ -17,9 +26,30 @@ variable "region" {
 }
 
 variable "project_number" {
-  description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
+  description = "GCP Project Number"
   type        = string
-  default     = "185017523924"  # Replace with your project number
+  default     = "185017523924"
+}
+
+# Pub/Sub Schema
+resource "google_pubsub_schema" "raw_data_schema" {
+  name    = "raw-data-schema"
+  project = var.project_id
+  type    = "AVRO"
+  definition = jsonencode({
+    type = "record",
+    name = "RawData",
+    fields = [
+      {
+        name = "data",
+        type = "string"
+      },
+      {
+        name = "table",
+        type = "string"
+      }
+    ]
+  })
 }
 
 # Pub/Sub Topic
@@ -29,17 +59,22 @@ resource "google_pubsub_topic" "raw_data_topic" {
   labels = {
     env = "dev"
   }
+  schema_settings {
+    schema   = google_pubsub_schema.raw_data_schema.id
+    encoding = "JSON"
+  }
+  depends_on = [google_pubsub_schema.raw_data_schema]
 }
 
 # BigQuery Dataset
 resource "google_bigquery_dataset" "banking_raw" {
-  dataset_id                  = "banking_raw"
-  project                     = var.project_id
-  location                    = var.region
-  delete_contents_on_destroy  = true  # For dev; set false in prod
+  dataset_id                 = "banking_raw"
+  project                   = var.project_id
+  location                  = var.region
+  delete_contents_on_destroy = true
 }
 
-# BigQuery Table with schema for raw JSON
+# BigQuery Table
 resource "google_bigquery_table" "raw_data" {
   dataset_id          = google_bigquery_dataset.banking_raw.dataset_id
   table_id           = "raw_data"
@@ -52,28 +87,26 @@ resource "google_bigquery_table" "raw_data" {
   depends_on = [google_bigquery_dataset.banking_raw]
 }
 
-# Pub/Sub Subscription with BigQuery Sink
+# Pub/Sub Subscription
 resource "google_pubsub_subscription" "raw_data_sub" {
   name    = "raw-data-sub"
   topic   = google_pubsub_topic.raw_data_topic.name
   project = var.project_id
-
   bigquery_config {
-    table = "${var.project_id}.${google_bigquery_dataset.banking_raw.dataset_id}.${google_bigquery_table.raw_data.table_id}"
-    # write_metadata removed to avoid requiring metadata columns
+    table            = "${var.project_id}.${google_bigquery_dataset.banking_raw.dataset_id}.${google_bigquery_table.raw_data.table_id}"
+    use_topic_schema = true
   }
-
-  message_retention_duration = "604800s"  # 7 days in seconds
-
-  depends_on = [google_bigquery_table.raw_data]
+  message_retention_duration = "604800s"
+  depends_on = [google_bigquery_table.raw_data, google_pubsub_topic.raw_data_topic]
 }
 
-# IAM: Grant Pub/Sub SA access to BigQuery
+# IAM
 resource "google_bigquery_dataset_iam_member" "pubsub_editor" {
   dataset_id = google_bigquery_dataset.banking_raw.dataset_id
   project    = var.project_id
   role       = "roles/bigquery.dataEditor"
   member     = "serviceAccount:service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  depends_on = [google_bigquery_dataset.banking_raw]
 }
 
 resource "google_bigquery_dataset_iam_member" "pubsub_viewer" {
@@ -81,6 +114,7 @@ resource "google_bigquery_dataset_iam_member" "pubsub_viewer" {
   project    = var.project_id
   role       = "roles/bigquery.metadataViewer"
   member     = "serviceAccount:service-${var.project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  depends_on = [google_bigquery_dataset.banking_raw]
 }
 
 # Outputs
