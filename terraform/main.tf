@@ -16,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "your-project-id"  # Replace
+  default     = "your-project-id"  # Replace with your GCP project ID
 }
 
 variable "region" {
@@ -28,13 +28,13 @@ variable "region" {
 variable "project_number" {
   description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
   type        = string
-  default     = ""  # Replace with actual number
+  default     = ""  # Replace with your project number
 }
 
 # Pub/Sub Topic
 resource "google_pubsub_topic" "raw_data_topic" {
-  name     = "banking-raw-data-topic"
-  project  = var.project_id
+  name    = "banking-raw-data-topic"
+  project = var.project_id
   labels = {
     env = "dev"
   }
@@ -50,38 +50,36 @@ resource "google_bigquery_dataset" "banking_raw" {
 
 # BigQuery Table with schema for raw JSON (table + record struct)
 resource "google_bigquery_table" "raw_data" {
-  dataset_id = google_bigquery_dataset.banking_raw.dataset_id
-  table_id   = "raw_data"
-  project    = var.project_id
+  dataset_id          = google_bigquery_dataset.banking_raw.dataset_id
+  table_id            = "raw_data"
+  project             = var.project_id
   deletion_protection = false  # For dev; set true in prod
 
   schema = jsonencode([
     {
-      name     = "table"
-      type     = "STRING"
-      mode     = "REQUIRED"
+      name        = "table"
+      type        = "STRING"
+      mode        = "REQUIRED"
       description = "Source table (customers, accounts, transactions, loans)"
     },
     {
-      name     = "record"
-      type     = "RECORD"
-      mode     = "REQUIRED"
+      name = "record"
+      type = "RECORD"
+      mode = "REQUIRED"
       fields = [
-        # Common fields; extend based on your data
-        { name = "id", type = "INTEGER", mode = "REQUIRED" },
-        { name = "name", type = "STRING", mode = "NULLABLE" },  # For customers
+        { name = "id", type = "INTEGER", mode = "NULLABLE" },  # Adjusted to NULLABLE for flexibility
+        { name = "name", type = "STRING", mode = "NULLABLE" },
         { name = "address", type = "STRING", mode = "NULLABLE" },
-        { name = "balance", type = "FLOAT", mode = "NULLABLE" },  # For accounts
-        { name = "amount", type = "FLOAT", mode = "NULLABLE" },  # For transactions
-        { name = "principal", type = "FLOAT", mode = "NULLABLE" },  # For loans
-        # Add more fields as needed (e.g., dates as TIMESTAMP)
+        { name = "balance", type = "FLOAT", mode = "NULLABLE" },
+        { name = "amount", type = "FLOAT", mode = "NULLABLE" },
+        { name = "principal", type = "FLOAT", mode = "NULLABLE" },
         { name = "date", type = "TIMESTAMP", mode = "NULLABLE" }
       ]
     }
   ])
 
   time_partitioning {
-    type = "DAY"  # Partition by ingestion date for efficiency
+    type = "DAY"  # Partition by ingestion date
   }
 
   depends_on = [google_bigquery_dataset.banking_raw]
@@ -89,17 +87,16 @@ resource "google_bigquery_table" "raw_data" {
 
 # Pub/Sub Subscription with BigQuery Sink
 resource "google_pubsub_subscription" "raw_data_sub" {
-  name  = "raw-data-sub"
-  topic = google_pubsub_topic.raw_data_topic.name
+  name    = "raw-data-sub"
+  topic   = google_pubsub_topic.raw_data_topic.name
   project = var.project_id
 
   bigquery_config {
     table = "${var.project_id}.${google_bigquery_dataset.banking_raw.dataset_id}.${google_bigquery_table.raw_data.table_id}"
-    use_table_insert = true  # Use streaming inserts
+    # write_metadata = true  # Optional: Include Pub/Sub metadata (e.g., message_id, publish_time)
   }
 
-  # Retention policy (7 days default)
-  message_retention_duration = "7d"
+  message_retention_duration = "7d"  # Retain unacknowledged messages for 7 days
 
   depends_on = [google_bigquery_table.raw_data]
 }
