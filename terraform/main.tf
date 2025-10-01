@@ -42,61 +42,13 @@ resource "google_bigquery_dataset" "banking_raw" {
 # BigQuery Table with schema for raw JSON
 resource "google_bigquery_table" "raw_data" {
   dataset_id          = google_bigquery_dataset.banking_raw.dataset_id
-  table_id            = "raw_data"
-  project             = var.project_id
-  deletion_protection = false  # For dev; set true in prod
-
-  schema = jsonencode([
-    {
-      name        = "data"
-      type        = "STRING"
-      mode        = "REQUIRED"
-      description = "Raw JSON payload from Pub/Sub message"
-    },
-    {
-      name        = "table"
-      type        = "STRING"
-      mode        = "REQUIRED"
-      description = "Source table (customers, accounts, transactions, loans)"
-    },
-    {
-      name = "record"
-      type = "RECORD"
-      mode = "REQUIRED"
-      fields = [
-            { name = "customer_id", type = ["null", "long"] },
-            { name = "name", type = ["null", "string"] },
-            { name = "address", type = ["null", "string"] },
-            { name = "email", type = ["null", "string"] },
-            { name = "phone", type = ["null", "string"] },
-            { name = "date_joined", type = ["null", "string"] },
-            { name = "account_id", type = ["null", "long"] },
-            { name = "account_number", type = ["null", "string"] },
-            { name = "account_type", type = ["null", "string"] },
-            { name = "balance", type = ["null", "double"] },
-            { name = "open_date", type = ["null", "string"] },
-            { name = "status", type = ["null", "string"] },
-            { name = "transaction_id", type = ["null", "long"] },
-            { name = "transaction_date", type = ["null", "string"] },
-            { name = "transaction_type", type = ["null", "string"] },
-            { name = "amount", type = ["null", "double"] },
-            { name = "description", type = ["null", "string"] },
-            { name = "category", type = ["null", "string"] },
-            { name = "balance_after", type = ["null", "double"] },
-            { name = "loan_id", type = ["null", "long"] },
-            { name = "loan_type", type = ["null", "string"] },
-            { name = "principal", type = ["null", "double"] },
-            { name = "interest_rate", type = ["null", "double"] },
-            { name = "term_months", type = ["null", "long"] },
-            { name = "issue_date", type = ["null", "string"] }
-          ]
-    }
-  ])
-
+  table_id           = "raw_data"
+  project            = var.project_id
+  deletion_protection = false
+  schema             = file("schema.json")
   time_partitioning {
-    type = "DAY"  # Partition by ingestion date
+    type = "DAY"
   }
-
   depends_on = [google_bigquery_dataset.banking_raw]
 }
 
