@@ -1,37 +1,47 @@
 import requests
 import json
-import argparse
 from google.cloud import pubsub_v1
 
-TOPIC_ID = "banking-raw-data"
+FLASK_API_URL = "http://localhost:5000/generate_data"
+PUBSUB_TOPIC = "projects/YOUR_PROJECT_ID/topics/banking-raw-data"
 
-def run_manual_ingest(project_id, api_url, num_customers=10, transactions_per_account=5):
+NUM_CUSTOMERS = 100
+TRANSACTIONS_PER_ACCOUNT = 10
+
+def fetch_data():
+    try:
+        response = requests.post(
+            FLASK_API_URL,
+            json={
+                "num_customers": NUM_CUSTOMERS,
+                "transactions_per_account": TRANSACTIONS_PER_ACCOUNT
+            }
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error fetching data: {e}")
+        return None
+
+def publish_to_pubsub(data):
     publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project_id, TOPIC_ID)
 
-    print(f"Calling API: {api_url} with num_customers={num_customers}, transactions_per_account={transactions_per_account}")
-    response = requests.post(api_url, json={
-        "num_customers": num_customers,
-        "transactions_per_account": transactions_per_account
-    })
-    response.raise_for_status()
-    data = response.json()
+    for data_type, records in data.items():
+        for record in records:
+            message_json = json.dumps({
+                "type": data_type,
+                "payload": record
+            })
+            message_bytes = message_json.encode("utf-8")
+            future = publisher.publish(PUBSUB_TOPIC, message_bytes)
+            future.result()
 
-    customers = data.get("data", {}).get("customers", [])
-    print(f"Publishing {len(customers)} customers to Pub/Sub topic {topic_path}")
-
-    for customer in customers:
-        msg = json.dumps(customer).encode("utf-8")
-        publisher.publish(topic_path, msg)
-    print("Publish complete.")
+    print("Data published to Pub/Sub successfully.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Manual data ingestion script")
-    parser.add_argument("--project_id", type=str, required=True, help="GCP Project ID")
-    parser.add_argument("--api_url", type=str, default="http://localhost:5000/generate_data", help="Data generator API URL")
-    parser.add_argument("--num_customers", type=int, default=10, help="Number of customers to generate")
-    parser.add_argument("--transactions_per_account", type=int, default=5, help="Transactions per account")
-
-    args = parser.parse_args()
-
-    run_manual_ingest(args.project_id, args.api_url, args.num_customers, args.transactions_per_account)
+    api_response = fetch_data()
+    if api_response and api_response.get("success"):
+        data = api_response["data"]
+        publish_to_pubsub(data)
+    else:
+        print("Failed to retrieve or publish data.")
