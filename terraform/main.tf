@@ -16,7 +16,7 @@ provider "google" {
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
-  default     = "your-project-id"  # Replace with your GCP project ID
+  default     = "brave-reason-421203"  # Replace with your GCP project ID
 }
 
 variable "region" {
@@ -28,7 +28,7 @@ variable "region" {
 variable "project_number" {
   description = "GCP Project Number (run `gcloud projects describe [PROJECT_ID] --format='value(projectNumber)'`)"
   type        = string
-  default     = ""  # Replace with your project number
+  default     = "185017523924"  # Replace with your project number
 }
 
 # Pub/Sub Topic
