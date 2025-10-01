@@ -1,10 +1,6 @@
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "5.42.0" # Downgrade from 7.5.0
-    }
-  }
+provider "google" {
+  project     = "my-project-id"
+  region      = "us-central1"
 }
 
 provider "google" {
