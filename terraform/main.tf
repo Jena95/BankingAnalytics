@@ -25,6 +25,9 @@ resource "google_bigquery_table" "demo_table" {
   dataset_id = google_bigquery_dataset.demo_dataset.dataset_id
   table_id   = "demo_table"
 
+  deletion_protection = false
+
+
   schema = <<EOF
 [
   { "name": "data", "type": "STRING", "mode": "NULLABLE" },
@@ -39,6 +42,7 @@ EOF
     type = "DAY"
     field = "publish_time"
   }
+  
 }
 
 
