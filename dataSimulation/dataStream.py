@@ -1,12 +1,12 @@
-from google.cloud import pubsub_v1
 import json
 import sys
+from google.cloud import pubsub_v1
 
 def main(project_id, topic_id):
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
 
-    data = {
+    message = {
         "transaction_id": "txn123",
         "account_id": "acc456",
         "transaction_type": "debit",
@@ -15,8 +15,11 @@ def main(project_id, topic_id):
         "merchant": "Amazon"
     }
 
-    # Send raw JSON object (not stringified)
-    future = publisher.publish(topic_path, **data)
+    # Serialize the message to a JSON string (this is correct)
+    data = json.dumps(message).encode("utf-8")
+
+    # Publish as a byte string (Pub/Sub will decode and validate against schema)
+    future = publisher.publish(topic_path, data=data)
     print(f"Published message ID: {future.result()}")
 
 if __name__ == "__main__":
