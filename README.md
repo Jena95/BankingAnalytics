@@ -15,18 +15,20 @@ Required IAM permissions for streaming to succeed
 1. Clone this repository
 
 
-2. Initialize Terraform
-``` terraform init
+2. Initialize Terraform `terraform init`
 
 3. Create Resources
-``` terraform apply -var="project_id=your-gcp-project-id"
+
+`
+terraform apply -var="project_id=your-gcp-project-id"
+`
+
 
 4. Test Pubsub to Bigquery Flow.
 
 ```
-gcloud pubsub topics publish banking-topic --message="Hello from Pub/Sub!"
+gcloud pubsub topics publish banking-topic --message="Hello from Pub/Sub!
 ```
-
 
 ```
 SELECT 
@@ -41,8 +43,9 @@ ORDER BY publish_time DESC
 
 5. In data simulation folder we have a python program that streams data to pubsub when run.
 
+```
 python dataStream.py your-project-id banking-topic
-
+```
 
 # Alternative Approach for each decision points.
 
@@ -66,13 +69,15 @@ Goto etl folder, then run below command or take the sql queries and run in conso
 
 1. Create a table (banking_clean) to store the converted data.
     
+    `
     bq query --use_legacy_sql=false < createTable.sql
+`
 
 2. Create a procedure(flatten_pubsub_data) that converts the json fields into flat table.
 
-    bq query --use_legacy_sql=false < createProcedure.sql
-
+    `
+  bq query --use_legacy_sql=false < createProcedure.sql
+`
 3. Schedule the procedure call.
     
-    CALL `banking_dataset.flatten_pubsub_data`('your-project-id');
-
+   ``` CALL `banking_dataset.flatten_pubsub_data`('your-project-id');```
