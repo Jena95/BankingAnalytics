@@ -1,6 +1,6 @@
+from google.cloud import pubsub_v1
 import json
 import sys
-from google.cloud import pubsub_v1
 
 def main(project_id, topic_id):
     publisher = pubsub_v1.PublisherClient()
@@ -10,24 +10,13 @@ def main(project_id, topic_id):
         "transaction_id": "txn123",
         "account_id": "acc456",
         "transaction_type": "debit",
-        "amount": float(250.75),  # Explicitly cast to float for AVRO double
+        "amount": 250.75,
         "timestamp": "2025-10-03T15:34:00Z",
         "merchant": "Amazon"
     }
 
-    # Log the JSON payload
-    json_payload = json.dumps(data)
-    print("Publishing message:", json_payload)
-
-    # Encode as UTF-8
-    data_bytes = json_payload.encode("utf-8")
-
-    # Publish with explicit content-type attribute
-    future = publisher.publish(
-        topic_path,
-        data=data_bytes,
-        content_type="application/json"  # Explicitly indicate JSON
-    )
+    # Send raw JSON object (not stringified)
+    future = publisher.publish(topic_path, **data)
     print(f"Published message ID: {future.result()}")
 
 if __name__ == "__main__":
@@ -35,6 +24,4 @@ if __name__ == "__main__":
         print("Usage: python publish_message.py <project_id> <topic_id>")
         sys.exit(1)
 
-    project_id_arg = sys.argv[1]
-    topic_id_arg = sys.argv[2]
-    main(project_id_arg, topic_id_arg)
+    main(sys.argv[1], sys.argv[2])
