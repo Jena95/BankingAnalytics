@@ -43,11 +43,12 @@ resource "google_bigquery_table" "banking_raw_table" {
 # Pub/Sub -> BigQuery Subscription
 resource "google_pubsub_subscription" "banking_subscription" {
   name  = "banking-subscription"
-  topic = google_pubsub_topic.banking_topic.id
+  topic = "banking-raw-topic"
 
   bigquery_config {
     table            = "projects/brave-reason-421203/datasets/banking_raw/tables/raw_banking_data"
     use_topic_schema = true
+    write_metadata   = true
   }
 
   ack_deadline_seconds = 20
