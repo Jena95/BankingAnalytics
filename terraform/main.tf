@@ -54,7 +54,6 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
 
   bigquery_config {
     table                  = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.demo_table.table_id}"
-    use_partitioned_tables = true
     write_metadata         = true
   }
 
