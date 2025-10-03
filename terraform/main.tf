@@ -46,12 +46,14 @@ resource "google_pubsub_subscription" "banking_subscription" {
   topic = google_pubsub_topic.banking_topic.id
 
   bigquery_config {
-    table            = google_bigquery_table.banking_raw_table.id
+    table            = "projects/${var.project_id}/datasets/${google_bigquery_dataset.banking_dataset.dataset_id}/tables/${google_bigquery_table.banking_raw_table.table_id}"
+    use_topic_schema = true
     write_metadata   = true
   }
 
   ack_deadline_seconds = 20
 }
+
 
 # IAM: Grant Pub/Sub Service Account BigQuery Data Editor
 data "google_project" "project" {}
