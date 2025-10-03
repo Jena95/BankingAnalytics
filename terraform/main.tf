@@ -43,6 +43,50 @@ EOF
   }
 }
 
+resource "google_bigquery_table" "banking_stream" {
+  dataset_id = google_bigquery_dataset.banking_dataset.dataset_id
+  table_id   = "banking_transactions"
+
+  schema = jsonencode([
+    {
+      name = "transaction_id"
+      type = "STRING"
+      mode = "REQUIRED"
+    },
+    {
+      name = "account_id"
+      type = "STRING"
+      mode = "REQUIRED"
+    },
+    {
+      name = "transaction_type"
+      type = "STRING"
+      mode = "NULLABLE"
+    },
+    {
+      name = "amount"
+      type = "FLOAT"
+      mode = "NULLABLE"
+    },
+    {
+      name = "timestamp"
+      type = "TIMESTAMP"
+      mode = "REQUIRED"
+    },
+    {
+      name = "merchant"
+      type = "STRING"
+      mode = "NULLABLE"
+    }
+  ])
+
+  time_partitioning {
+    type = "DAY"
+    field = "timestamp"
+  }
+}
+
+
 
 
 
