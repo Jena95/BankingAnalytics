@@ -43,7 +43,7 @@ resource "google_bigquery_table" "banking_raw_table" {
 # Pub/Sub -> BigQuery Subscription
 resource "google_pubsub_subscription" "banking_subscription" {
   name  = "banking-subscription"
-  topic = "banking-raw-topic"
+  topic = "projects/brave-reason-421203/topics/banking-raw-topic"
 
   bigquery_config {
     table            = "projects/brave-reason-421203/datasets/banking_raw/tables/raw_banking_data"
