@@ -55,7 +55,7 @@ EOF
 
 
 resource "google_bigquery_table" "banking_table" {
-  dataset_id = google_bigquery_dataset.demo_dataset.dataset_id
+  dataset_id = google_bigquery_dataset.banking_dataset.dataset_id
   table_id   = "banking_raw"
 
   deletion_protection = false
