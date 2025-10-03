@@ -24,8 +24,9 @@ Required IAM permissions for streaming to succeed
 4. Test Pubsub to Bigquery Flow.
 
 ```
-gcloud pubsub topics publish demo-topic --message="Hello from Pub/Sub!"
+gcloud pubsub topics publish banking-topic --message="Hello from Pub/Sub!"
 ```
+
 
 ```
 SELECT 
@@ -34,9 +35,13 @@ SELECT
   message_id, 
   attributes, 
   subscription_name
-FROM `your-gcp-project-id.demo_dataset.demo_table`
+FROM `your-gcp-project-id.banking_dataset.banking_raw`
 ORDER BY publish_time DESC
 ```
+
+5. In data simulation folder we have a python program that streams data to pubsub when run.
+
+python dataStream.py brave-reason-421203 banking-topic
 
 
 # Alternative Approach for each decision points.
@@ -66,4 +71,8 @@ Goto etl folder, then run below command or take the sql queries and run in conso
 2. Create a procedure(flatten_pubsub_data) that converts the json fields into flat table.
 
     bq query --use_legacy_sql=false < createProcedure.sql
+
+3. Schedule the procedure call.
+    
+    CALL `banking_dataset.flatten_pubsub_data`('your-project-id');
 
