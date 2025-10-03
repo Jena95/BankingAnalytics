@@ -3,12 +3,47 @@ provider "google" {
   region  = var.region
 }
 
+
+#-------------------------
+#Pub/Sub Schema
+#-------------------------
+
+resource "google_pubsub_schema" "banking_schema" {
+  name       = "banking-transaction-schema"
+  type       = "AVRO"
+  definition = <<EOF
+{
+  "type": "record",
+  "name": "BankingTransaction",
+  "fields": [
+    { "name": "transaction_id", "type": "string" },
+    { "name": "account_id", "type": "string" },
+    { "name": "transaction_type", "type": ["null", "string"], "default": null },
+    { "name": "amount", "type": ["null", "double"], "default": null },
+    { "name": "timestamp", "type": "string" },
+    { "name": "merchant", "type": ["null", "string"], "default": null }
+  ]
+}
+EOF
+}
+
+#-------------------------
+
 # ------------------------
 # Pub/Sub Topic
 # ------------------------
 resource "google_pubsub_topic" "demo_topic" {
   name = "demo-topic"
 }
+
+resource "google_pubsub_topic" "banking_topic" {
+  name   = "banking-topic"
+  schema_settings {
+    schema = google_pubsub_schema.banking_schema.id
+    encoding = "JSON"
+  }
+}
+
 
 # ------------------------
 # BigQuery Dataset
@@ -45,7 +80,7 @@ EOF
 
 resource "google_bigquery_table" "banking_stream" {
   dataset_id = google_bigquery_dataset.demo_dataset.dataset_id
-  table_id   = "banking_transactions"
+  table_id   = "banking_transactions_raw"
 
   schema = jsonencode([
     {
@@ -105,18 +140,19 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
   ack_deadline_seconds = 60
 }
 
-resource "google_pubsub_subscription" "banking_stream_subscription" {
-  name  = "banking-stream-sub"
-  topic = google_pubsub_topic.demo_topic.name
+resource "google_pubsub_subscription" "banking_subscription" {
+  name  = "banking-sub"
+  topic = google_pubsub_topic.banking_topic.name
 
   bigquery_config {
-    table = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.banking_stream.table_id}"
-    use_topic_schema = false  # set to true if using Pub/Sub schema
-    write_metadata   = false  # optional
+    table               = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.banking_stream.table_id}"
+    use_topic_schema    = true
+    write_metadata      = false
   }
 
   ack_deadline_seconds = 60
 }
+
 
 
 # ------------------------
