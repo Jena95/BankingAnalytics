@@ -24,18 +24,15 @@ resource "google_bigquery_dataset" "demo_dataset" {
 resource "google_bigquery_table" "demo_table" {
   dataset_id = google_bigquery_dataset.demo_dataset.dataset_id
   table_id   = "demo_table"
+
   schema     = <<EOF
 [
-  {
-    "name": "message",
-    "type": "STRING",
-    "mode": "NULLABLE"
-  },
-  {
-    "name": "timestamp",
-    "type": "TIMESTAMP",
-    "mode": "NULLABLE"
-  }
+  { "name": "message", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "timestamp", "type": "TIMESTAMP", "mode": "NULLABLE" },
+  { "name": "subscription_name", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "message_id", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "attributes", "type": "STRING", "mode": "NULLABLE" },
+  { "name": "publish_time", "type": "TIMESTAMP", "mode": "NULLABLE" }
 ]
 EOF
 
@@ -44,6 +41,7 @@ EOF
     field = "timestamp"
   }
 }
+
 
 # ------------------------
 # Pub/Sub Subscription → BigQuery
