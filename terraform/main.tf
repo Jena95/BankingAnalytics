@@ -27,7 +27,6 @@ resource "google_bigquery_table" "demo_table" {
 
   deletion_protection = false
 
-
   schema = <<EOF
 [
   { "name": "data", "type": "STRING", "mode": "NULLABLE" },
@@ -42,8 +41,8 @@ EOF
     type = "DAY"
     field = "publish_time"
   }
-  
 }
+
 
 
 
