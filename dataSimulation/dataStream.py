@@ -15,8 +15,13 @@ def main(project_id, topic_id):
         "merchant": "Amazon"
     }
 
+    # Log the JSON payload for debugging
+    print("Publishing message:", json.dumps(data))
+
+    # Serialize to JSON and encode as UTF-8
     data_bytes = json.dumps(data).encode("utf-8")
 
+    # Publish the message
     future = publisher.publish(topic_path, data=data_bytes)
     print(f"Published message ID: {future.result()}")
 
