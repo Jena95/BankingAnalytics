@@ -52,5 +52,15 @@ ORDER BY publish_time DESC
 | Metadata          | `write_metadata=true`     | Set `false` to simplify table schema                      |
 
 
+__________________________________________________________________________________
 
+Now we will use the raw streamed data for data analysis.
 
+To do this we will convert the pubsub json data format into flat format.
+
+1. Create a procedure that converts the json fields into flat table.
+
+bq query --use_legacy_sql=false --project_id=my-gcp-project \
+--query "$(cat create_procedure.sql)"
+
+2. 
