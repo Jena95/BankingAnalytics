@@ -57,10 +57,13 @@ ________________________________________________________________________________
 Now we will use the raw streamed data for data analysis.
 
 To do this we will convert the pubsub json data format into flat format.
+Goto etl folder, then run below command or take the sql queries and run in console.
 
-1. Create a procedure that converts the json fields into flat table.
+1. Create a table (banking_clean) to store the converted data.
+    
+    bq query --use_legacy_sql=false < createTable.sql
 
-bq query --use_legacy_sql=false --project_id=my-gcp-project \
---query "$(cat create_procedure.sql)"
+2. Create a procedure(flatten_pubsub_data) that converts the json fields into flat table.
 
-2. 
+    bq query --use_legacy_sql=false < createProcedure.sql
+

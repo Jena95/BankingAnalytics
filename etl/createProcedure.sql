@@ -5,8 +5,8 @@ BEGIN
   DECLARE sql_statement STRING;
 
   -- Define table names dynamically
-  SET target_table = FORMAT('%s.banking_dataset.flat_transactions', project_id);
-  SET source_table = FORMAT('%s.banking_dataset.raw_pubsub_data', project_id);
+  SET target_table = FORMAT('%s.banking_dataset.banking_clean', project_id);
+  SET source_table = FORMAT('%s.banking_dataset.banking_raw', project_id);
 
   -- Compose the dynamic SQL
   SET sql_statement = FORMAT("""
