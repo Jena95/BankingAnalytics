@@ -9,17 +9,25 @@ def main(project_id, topic_id):
     data = {
         "transaction_id": "txn123",
         "account_id": "acc456",
-        "transaction_type": "debit"
+        "transaction_type": "debit",
+        "amount": float(250.75),  # Explicitly cast to float for AVRO double
+        "timestamp": "2025-10-03T15:34:00Z",
+        "merchant": "Amazon"
     }
 
-    # Log the JSON payload for debugging
-    print("Publishing message:", json.dumps(data))
+    # Log the JSON payload
+    json_payload = json.dumps(data)
+    print("Publishing message:", json_payload)
 
-    # Serialize to JSON and encode as UTF-8
-    data_bytes = json.dumps(data).encode("utf-8")
+    # Encode as UTF-8
+    data_bytes = json_payload.encode("utf-8")
 
-    # Publish the message
-    future = publisher.publish(topic_path, data=data_bytes)
+    # Publish with explicit content-type attribute
+    future = publisher.publish(
+        topic_path,
+        data=data_bytes,
+        content_type="application/json"  # Explicitly indicate JSON
+    )
     print(f"Published message ID: {future.result()}")
 
 if __name__ == "__main__":
