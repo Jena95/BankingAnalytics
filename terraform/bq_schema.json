@@ -24,6 +24,5 @@
   { "name": "principal", "type": "FLOAT", "mode": "NULLABLE" },
   { "name": "interest_rate", "type": "FLOAT", "mode": "NULLABLE" },
   { "name": "term_months", "type": "INTEGER", "mode": "NULLABLE" },
-  { "name": "issue_date", "type": "STRING", "mode": "NULLABLE" },
-  { "name": "status", "type": "STRING", "mode": "NULLABLE" }
+  { "name": "issue_date", "type": "STRING", "mode": "NULLABLE" }
 ]
