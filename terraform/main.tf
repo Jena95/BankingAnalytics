@@ -92,7 +92,7 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
   ack_deadline_seconds = 60
 }
 
-resource "google_pubsub_subscription" "bigquery_subscription" {
+resource "google_pubsub_subscription" "banking_table_subscription" {
   name  = "banking-subscription"
   topic = google_pubsub_topic.banking_topic.name
 
