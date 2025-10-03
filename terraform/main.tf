@@ -11,7 +11,6 @@ resource "google_pubsub_topic" "banking_topic" {
   }
   schema_settings {
     schema = google_pubsub_schema.banking_schema.id
-    encoding = "JSON"
   }
 }
 
