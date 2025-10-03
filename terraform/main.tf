@@ -48,7 +48,6 @@ resource "google_pubsub_subscription" "banking_subscription" {
   bigquery_config {
     table            = "projects/brave-reason-421203/datasets/banking_raw/tables/raw_banking_data"
     use_topic_schema = true
-    write_metadata   = true
   }
 
   ack_deadline_seconds = 20
