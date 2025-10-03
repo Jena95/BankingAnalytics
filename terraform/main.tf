@@ -97,7 +97,7 @@ resource "google_pubsub_subscription" "banking_table_subscription" {
   topic = google_pubsub_topic.banking_topic.name
 
   bigquery_config {
-    table                  = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.demo_table.table_id}"
+    table                  = "${var.project_id}:${google_bigquery_dataset.banking_dataset.dataset_id}.${google_bigquery_table.banking_table.table_id}"
     write_metadata         = true
   }
 
