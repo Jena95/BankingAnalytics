@@ -1,21 +1,56 @@
-# BankingAnalytics
-Data Engineering and Data Analytics on Simulated Bank Data
+# GCP Pub/Sub → BigQuery Streaming (POC)
 
-# Data Generator
-pip install -r requirements.txt
+This project is a Proof of Concept (POC) for streaming data directly from Google Cloud Pub/Sub to BigQuery using Terraform.
 
-# Test Data Generator in Local.
+It sets up:
 
-Run the API:
+A Pub/Sub topic
 
-python app.py
+A BigQuery dataset and table
 
-Make a test request:
+A subscription that directly streams data from the topic to BigQuery
 
-curl -X POST http://localhost:5000/generate_data \
-     -H "Content-Type: application/json" \
-     -d '{"num_customers": 100, "transactions_per_account": 10}'
+Required IAM permissions for streaming to succeed
 
-# Ingest the data to pubsub
+1. Clone this repository
 
-python dataIngestion.py --project_id=my-gcp-project --api_url=http://localhost:5000/generate_data --num_customers=20 --transactions_per_account=50
+
+2. Initialize Terraform
+``` terraform init
+
+3. Create Resources
+``` terraform apply -var="project_id=your-gcp-project-id"
+
+4. Test Pubsub to Bigquery Flow.
+
+```
+gcloud pubsub topics publish demo-topic --message="Hello from Pub/Sub!"
+```
+
+```
+SELECT 
+  publish_time, 
+  data, 
+  message_id, 
+  attributes, 
+  subscription_name
+FROM `your-gcp-project-id.demo_dataset.demo_table`
+ORDER BY publish_time DESC
+```
+
+
+# Alternative Approach for each decision points.
+
+| Step              | Approach Used             | Alternatives / Trade-offs                                 |
+| ----------------- | ------------------------- | --------------------------------------------------------- |
+| Provisioning      | Terraform (IaC)           | `gcloud`, Console UI — less reproducible                  |
+| Data ingestion    | Direct Pub/Sub → BigQuery | Use **Dataflow**, **Cloud Functions** for transformations |
+| Schema management | Static JSON schema        | Use **schema auto-detect** or **external JSON file**      |
+| Permissions       | Manual IAM binding        | Use **custom roles**, **least privilege** model           |
+| Partitioning      | BQ `publish_time` field   | Use ingestion time or a custom timestamp                  |
+| Message format    | Simple strings            | Use structured **JSON**, **AVRO**, **Protobuf**           |
+| Metadata          | `write_metadata=true`     | Set `false` to simplify table schema                      |
+
+
+
+
