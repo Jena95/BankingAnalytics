@@ -47,7 +47,6 @@ resource "google_pubsub_subscription" "banking_subscription" {
 
   bigquery_config {
     table            = google_bigquery_table.banking_raw_table.id
-    use_topic_schema = true
     write_metadata   = true
   }
 
