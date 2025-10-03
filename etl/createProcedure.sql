@@ -15,7 +15,7 @@ BEGIN
       account_id,
       transaction_type,
       amount,
-      transaction_timestamp
+      transaction_timestamp,
       merchant,
       subscription_name,
       publish_time
