@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE `your_project.banking_dataset.flatten_pubsub_data`(project_id STRING)
+CREATE OR REPLACE PROCEDURE `banking_dataset.flatten_pubsub_data`(project_id STRING)
 BEGIN
   DECLARE target_table STRING;
   DECLARE source_table STRING;
@@ -15,7 +15,7 @@ BEGIN
       account_id,
       transaction_type,
       amount,
-      transaction_timestamp,
+      transaction_timestamp
       merchant,
       subscription_name,
       publish_time
