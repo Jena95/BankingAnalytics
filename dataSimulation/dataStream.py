@@ -9,10 +9,7 @@ def main(project_id, topic_id):
     data = {
         "transaction_id": "txn123",
         "account_id": "acc456",
-        "transaction_type": "debit",
-        "amount": 250.75,
-        "timestamp": "2025-10-03T15:34:00Z",
-        "merchant": "Amazon"
+        "transaction_type": "debit"
     }
 
     # Log the JSON payload for debugging
