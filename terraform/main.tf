@@ -43,12 +43,16 @@ resource "google_bigquery_table" "banking_raw_table" {
 # Pub/Sub -> BigQuery Subscription
 resource "google_pubsub_subscription" "banking_subscription" {
   name  = "banking-subscription"
-  topic = "projects/brave-reason-421203/topics/banking-raw-topic"
+  # FIX: Reference the Pub/Sub topic resource
+  topic = google_pubsub_topic.banking_topic.id
 
   bigquery_config {
-    table            = "projects/brave-reason-421203/datasets/banking_raw/tables/raw_banking_data"
-    use_topic_schema = true
-    write_metadata   = true
+    # FIX: Reference the BigQuery table resource
+    table             = google_bigquery_table.banking_raw_table.id
+    use_topic_schema  = true
+    write_metadata    = true
+    # OPTIONAL: You might want to set this if you expect a lot of failures
+    # drop_unknown_fields = true 
   }
 
   ack_deadline_seconds = 20
