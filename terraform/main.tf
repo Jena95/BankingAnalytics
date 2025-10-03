@@ -3,45 +3,11 @@ provider "google" {
   region  = var.region
 }
 
-
-#-------------------------
-#Pub/Sub Schema
-#-------------------------
-
-resource "google_pubsub_schema" "banking_schema" {
-  name       = "banking-transaction-schema"
-  type       = "AVRO"
-  definition = <<EOF
-{
-  "type": "record",
-  "name": "BankingTransaction",
-  "fields": [
-    { "name": "transaction_id", "type": "string" },
-    { "name": "account_id", "type": "string" },
-    { "name": "transaction_type", "type": ["null", "string"], "default": null },
-    { "name": "amount", "type": ["null", "double"], "default": null },
-    { "name": "timestamp", "type": "string" },
-    { "name": "merchant", "type": ["null", "string"], "default": null }
-  ]
-}
-EOF
-}
-
-#-------------------------
-
 # ------------------------
 # Pub/Sub Topic
 # ------------------------
 resource "google_pubsub_topic" "demo_topic" {
   name = "demo-topic"
-}
-
-resource "google_pubsub_topic" "banking_topic" {
-  name   = "banking-topic"
-  schema_settings {
-    schema = google_pubsub_schema.banking_schema.id
-    encoding = "JSON"
-  }
 }
 
 
@@ -78,52 +44,6 @@ EOF
   }
 }
 
-resource "google_bigquery_table" "banking_stream" {
-  dataset_id = google_bigquery_dataset.demo_dataset.dataset_id
-  table_id   = "banking_transactions_raw"
-
-  schema = jsonencode([
-    {
-      name = "transaction_id"
-      type = "STRING"
-      mode = "REQUIRED"
-    },
-    {
-      name = "account_id"
-      type = "STRING"
-      mode = "REQUIRED"
-    },
-    {
-      name = "transaction_type"
-      type = "STRING"
-      mode = "NULLABLE"
-    },
-    {
-      name = "amount"
-      type = "FLOAT"
-      mode = "NULLABLE"
-    },
-    {
-      name = "timestamp"
-      type = "TIMESTAMP"
-      mode = "REQUIRED"
-    },
-    {
-      name = "merchant"
-      type = "STRING"
-      mode = "NULLABLE"
-    }
-  ])
-
-  time_partitioning {
-    type = "DAY"
-    field = "timestamp"
-  }
-}
-
-
-
-
 
 # ------------------------
 # Pub/Sub Subscription → BigQuery
@@ -139,20 +59,6 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
 
   ack_deadline_seconds = 60
 }
-
-resource "google_pubsub_subscription" "banking_subscription" {
-  name  = "banking-sub"
-  topic = google_pubsub_topic.banking_topic.name
-
-  bigquery_config {
-    table               = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.banking_stream.table_id}"
-    use_topic_schema    = true
-    write_metadata      = false
-  }
-
-  ack_deadline_seconds = 60
-}
-
 
 
 # ------------------------
