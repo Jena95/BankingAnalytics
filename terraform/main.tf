@@ -46,7 +46,7 @@ resource "google_pubsub_subscription" "banking_subscription" {
   topic = google_pubsub_topic.banking_topic.id
 
   bigquery_config {
-    table            = "projects/${var.project_id}/datasets/banking_raw/tables/raw_banking_data"
+    table            = "projects/brave-reason-421203/datasets/banking_raw/tables/raw_banking_data"
     use_topic_schema = true
     write_metadata   = true
   }
