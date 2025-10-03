@@ -1,12 +1,13 @@
-from google.cloud import pubsub_v1
 import json
 import sys
+from google.cloud import pubsub_v1
 
 def main(project_id, topic_id):
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_id)
 
-    message_dict = {
+    # This dict must match your Avro schema exactly
+    message = {
         "transaction_id": "txn123",
         "account_id": "acc456",
         "transaction_type": "debit",
@@ -15,9 +16,11 @@ def main(project_id, topic_id):
         "merchant": "Amazon"
     }
 
-    # ⚠️ DO NOT encode to JSON string here — send as a dict
-    # Instead, use the json argument (requires newer google-cloud-pubsub library)
-    future = publisher.publish(topic_path, json=message_dict)
+    # ✅ Properly encode to bytes without nesting or wrapping
+    data = json.dumps(message).encode("utf-8")
+
+    # Publish
+    future = publisher.publish(topic_path, data=data)
     print(f"Published message ID: {future.result()}")
 
 if __name__ == "__main__":
