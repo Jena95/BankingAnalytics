@@ -105,6 +105,20 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
   ack_deadline_seconds = 60
 }
 
+resource "google_pubsub_subscription" "banking_stream_subscription" {
+  name  = "banking-stream-sub"
+  topic = google_pubsub_topic.demo_topic.name
+
+  bigquery_config {
+    table = "${var.project_id}:${google_bigquery_dataset.demo_dataset.dataset_id}.${google_bigquery_table.banking_stream.table_id}"
+    use_topic_schema = false  # set to true if using Pub/Sub schema
+    write_metadata   = false  # optional
+  }
+
+  ack_deadline_seconds = 60
+}
+
+
 # ------------------------
 # IAM: Allow Pub/Sub to Write to BigQuery
 # ------------------------
