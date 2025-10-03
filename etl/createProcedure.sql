@@ -1,7 +1,16 @@
 CREATE OR REPLACE PROCEDURE `your_project.banking_dataset.flatten_pubsub_data`(project_id STRING)
 BEGIN
-  EXECUTE IMMEDIATE FORMAT("""
-    INSERT INTO `%s.your_dataset.flat_transactions` (
+  DECLARE target_table STRING;
+  DECLARE source_table STRING;
+  DECLARE sql_statement STRING;
+
+  -- Define table names dynamically
+  SET target_table = FORMAT('%s.banking_dataset.flat_transactions', project_id);
+  SET source_table = FORMAT('%s.banking_dataset.raw_pubsub_data', project_id);
+
+  -- Compose the dynamic SQL
+  SET sql_statement = FORMAT("""
+    INSERT INTO `%s` (
       transaction_id,
       account_id,
       transaction_type,
@@ -21,8 +30,11 @@ BEGIN
       subscription_name,
       publish_time
     FROM
-      `%s.your_dataset.raw_pubsub_data`
+      `%s`
     WHERE
       publish_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY);
-  """, project_id, project_id);
+  """, target_table, source_table);
+
+  -- Run the query
+  EXECUTE IMMEDIATE sql_statement;
 END;
