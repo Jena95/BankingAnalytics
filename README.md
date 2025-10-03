@@ -41,7 +41,7 @@ ORDER BY publish_time DESC
 
 5. In data simulation folder we have a python program that streams data to pubsub when run.
 
-python dataStream.py brave-reason-421203 banking-topic
+python dataStream.py your-project-id banking-topic
 
 
 # Alternative Approach for each decision points.
