@@ -63,15 +63,14 @@ resource "google_pubsub_subscription" "bigquery_subscription" {
 # ------------------------
 # IAM: Allow Pub/Sub to Write to BigQuery
 # ------------------------
+# This is the Google-managed service account used by Pub/Sub for BigQuery streaming
+# Format: service-<project-number>@gcp-sa-pubsub.iam.gserviceaccount.com
+
 
 data "google_project" "project" {}
-
-data "google_service_account" "pubsub_sa" {
-  account_id = "service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
 
 resource "google_project_iam_member" "pubsub_bigquery_writer" {
   project = var.project_id
   role    = "roles/bigquery.dataEditor"
-  member  = "serviceAccount:${data.google_service_account.pubsub_sa.email}"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
