@@ -1,6 +1,6 @@
 # GCP Pub/Sub → BigQuery Streaming (POC)
 
-This project is a Proof of Concept (POC) for streaming data directly from Google Cloud Pub/Sub to BigQuery using Terraform.
+This project is about streaming data directly from Google Cloud Pub/Sub to BigQuery for data analysis using Terraform.
 
 It sets up:
 
